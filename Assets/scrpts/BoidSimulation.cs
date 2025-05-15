@@ -19,9 +19,11 @@ public class BoidSimulationControl : MonoBehaviour
     public GameObject obstaclePrefab ;
 
     public int numBoidToSpawn = 4;
-    public List<Boid> boids = null;
+    public List<Boid> boids = new List<Boid>();
 
     private Camera mainCamera;
+
+    public LayerMask groundLayer;
 
     private void Awake()
     {
@@ -71,7 +73,7 @@ public class BoidSimulationControl : MonoBehaviour
     private void HandleMouseClick(bool leftClick)
     {
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out RaycastHit hit))
+        if (Physics.Raycast(ray, out RaycastHit hit,100f,groundLayer))
         {
             Vector3 targetPos = hit.point;
 
