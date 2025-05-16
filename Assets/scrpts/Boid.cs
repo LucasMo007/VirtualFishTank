@@ -6,10 +6,10 @@ public class Boid : MonoBehaviour
   
     private Rigidbody rigidbody;
 
-    public float maxSpeed = 2f;
-    public float maxAcceleration = 3f;
+    public float maxSpeed = 2.0f;
+    public float maxAcceleration = 3.0f;
 
-    public float arriveRadius = 0.5f;
+    public float arriveRadius = 0.2f;
     public float sensorLength = 2f; // for obstacle avoidance
     public LayerMask obstacleMask;
 
@@ -28,18 +28,24 @@ public class Boid : MonoBehaviour
     private void FixedUpdate()
     {
         Vector3 target = MouseTarget.Position;
-        bool LeftClick = MouseTarget.LeftClick;
+        //bool LeftClick = MouseTarget.LeftClick;//
         Vector3 totalSteering = Vector3.zero;
-
+        Debug.Log("Right Mouse Pressed: " + Input.GetMouseButton(1));
         // 控制模式处理（需要 BoidSimulationControl.cs）
         switch (BoidSimulationControl.Instance.controlMode)
         {
             case BoidSimulationControl.ControlMode.Seek:
-                totalSteering += Seek(target);
-                break;
+                if (Input.GetMouseButton(1)) // 右键按住时使用 Flee 行为
+                    totalSteering += Flee(target);
 
+                else if(Input.GetMouseButton(0))
+                    totalSteering += Seek(target);
+                break;
             case BoidSimulationControl.ControlMode.Pursue:
-                totalSteering += Pursue(target);
+                if (Input.GetMouseButton(0)) // 左键
+                    totalSteering += Pursue(target);
+                else if (Input.GetMouseButton(1)) // 右键
+                    totalSteering += Evade(target);
                 break;
 
             case BoidSimulationControl.ControlMode.Food:
@@ -50,6 +56,7 @@ public class Boid : MonoBehaviour
             case BoidSimulationControl.ControlMode.Obstacle:
                 totalSteering += ObstacleAvoidance();
                 break;
+                
         }
 
         ApplySteering(totalSteering);
@@ -63,25 +70,39 @@ public class Boid : MonoBehaviour
         Vector3 desired = (target - transform.position).normalized * maxSpeed;
         return (desired - rigidbody.linearVelocity).normalized * maxAcceleration;
     }
-
-    private Vector3 Pursue(Vector3 target)
+    private Vector3 Flee(Vector3 target)
     {
-        Vector3 desired = (target - transform.position).normalized * maxSpeed;
+        Vector3 desired = (transform.position - target).normalized * maxSpeed;
         Vector3 steer = desired - rigidbody.linearVelocity;
         return steer.normalized * maxAcceleration;
+    }
+    private Vector3 Pursue(Vector3 target)
+    {
+        Vector3 desiredDir = (target - transform.position).normalized;
+        Vector3 currentDir = rigidbody.linearVelocity.normalized;
+        Vector3 steer = (desiredDir - currentDir).normalized * maxAcceleration;
+        return steer;
+    }
+    private Vector3 Evade(Vector3 target)
+    {
+        Vector3 fleeDir = (transform.position - target).normalized;
+        Vector3 currentDir = rigidbody.linearVelocity.normalized;
+        Vector3 steer = (fleeDir - currentDir).normalized * maxAcceleration;
+        return steer;
     }
 
     private Vector3 Arrive(GameObject targetObj)
     {
         Vector3 toTarget = targetObj.transform.position - transform.position;
         float distance = toTarget.magnitude;
-
-        if (distance < arriveRadius)
+        float speed = rigidbody.linearVelocity.magnitude;
+        if (distance < arriveRadius && speed < 0.05f) // 加入速度判断
         {
-            Destroy(targetObj);
-            return -rigidbody.linearVelocity; // slow to stop
+            //Destroy(targetObj)//;//eat food
+            Destroy(targetObj, 0.1f);
+            return Vector3.zero; // slow to stop
         }
-
+        //reach the the edge of radius ,and slow speed
         float slowDownFactor = Mathf.Clamp01(distance / 2f); // 2f = slowing zone
         Vector3 desired = toTarget.normalized * maxSpeed * slowDownFactor;
         Vector3 steer = desired - rigidbody.linearVelocity;

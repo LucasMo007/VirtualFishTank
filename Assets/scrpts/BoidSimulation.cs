@@ -44,7 +44,20 @@ public class BoidSimulationControl : MonoBehaviour
     }
 
     private void Update()
-    {
+    {    // 1. 持续更新鼠标位置
+        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out RaycastHit hit, 100f, groundLayer))
+        {
+            MouseTarget.Position = hit.point;
+        }
+
+        // 2. 处理鼠标点击（放置物体）
+        if (Input.GetMouseButtonDown(0)) HandleMouseClick(true);   // 左键：放食物
+        if (Input.GetMouseButtonDown(1)) HandleMouseClick(false);  // 右键：放障碍
+
+        // 3. 显示调试信息
+        Debug.Log("Mouse World Position: " + MouseTarget.Position);
+
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             controlMode = ControlMode.Seek;
@@ -63,12 +76,7 @@ public class BoidSimulationControl : MonoBehaviour
         {
             controlMode = ControlMode.Obstacle;
         }
-        // Mouse interaction
-        if (Input.GetMouseButtonDown(0)) // Left click
-            HandleMouseClick(true);
-        if (Input.GetMouseButtonDown(1)) // Right click
-            HandleMouseClick(false);
-        Debug.Log("world：" + MouseTarget.Position);
+       
     }
 
 
@@ -81,12 +89,12 @@ public class BoidSimulationControl : MonoBehaviour
             Vector3 targetPos = hit.point;
 
             // Save global mouse target
-            MouseTarget.Position = targetPos;
+            //MouseTarget.Position = targetPos;//
             MouseTarget.LeftClick = leftClick;
           
 
             // Based on mode, place food or obstacle
-            /* if (controlMode == ControlMode.Food && leftClick)
+            if (controlMode == ControlMode.Food && leftClick)
              {
                  GameObject food = Instantiate(foodPrefab, targetPos, Quaternion.identity);
                  food.tag = "Food";
@@ -95,7 +103,7 @@ public class BoidSimulationControl : MonoBehaviour
              {
                  GameObject obstacle = Instantiate(obstaclePrefab, targetPos, Quaternion.identity);
                  obstacle.tag = "Obstacle";
-             }*/
+             }
         }
     }
 }
