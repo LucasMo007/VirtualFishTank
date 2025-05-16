@@ -3,7 +3,7 @@
 
 public class Boid : MonoBehaviour
 {
-    private GameObject TargetObject;
+  
     private Rigidbody rigidbody;
 
     public float maxSpeed = 2f;
@@ -22,24 +22,24 @@ public class Boid : MonoBehaviour
 
     private void Start()
     {
-        TargetObject = GameObject.Find("Target");
+        
     }
 
     private void FixedUpdate()
     {
         Vector3 target = MouseTarget.Position;
-        bool isLeftClick = MouseTarget.LeftClick;
+        bool LeftClick = MouseTarget.LeftClick;
         Vector3 totalSteering = Vector3.zero;
 
         // 控制模式处理（需要 BoidSimulationControl.cs）
         switch (BoidSimulationControl.Instance.controlMode)
         {
             case BoidSimulationControl.ControlMode.Seek:
-                totalSteering += Seek(TargetObject.transform.position);
+                totalSteering += Seek(target);
                 break;
 
             case BoidSimulationControl.ControlMode.Pursue:
-                totalSteering += Pursue(TargetObject.transform.position);
+                totalSteering += Pursue(target);
                 break;
 
             case BoidSimulationControl.ControlMode.Food:
@@ -156,7 +156,7 @@ public class Boid : MonoBehaviour
 
     private void Awake()
     {
-        GetComponent<Renderer>().material.SetColor("_BaseColor",Random.ColorHSV(0,1,0.5f,1,0.5f,1));
+        GetComponent<Renderer>().material.SetColor("_BaseColor", Random.ColorHSV(0, 1, 0.5f, 1, 0.5f, 1));
         rigidbody = GetComponent<Rigidbody>();
         rigidbody.linearVelocity = Random.insideUnitSphere;
     }
@@ -168,7 +168,7 @@ public class Boid : MonoBehaviour
     }
     private void FixedUpdate()
     {
-      
+
         Vector3 toTarget = TargetObject.transform.position - transform.position;
         Vector3 toTargetNormalized = toTarget.normalized;
         Vector3 acceleration = toTargetNormalized * maxAcceleration;
@@ -177,13 +177,14 @@ public class Boid : MonoBehaviour
         float speed = vel.magnitude;
         if (speed > maxSpeed)
         {
-            vel =vel.normalized *maxSpeed;
+            vel = vel.normalized * maxSpeed;
         }
 
         transform.forward = rigidbody.linearVelocity;
 
 
-    }*/
+    }
+}*/
         /*Vector3 totalSteering = Vector3.zero;
 
         // Decide what behavior to run based on mode
