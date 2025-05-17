@@ -1,36 +1,63 @@
-﻿using UnityEngine;
+﻿
+using UnityEngine;
 
 
 public class Boid : MonoBehaviour
 {
-  
+
     private Rigidbody rigidbody;
 
     public float maxSpeed = 2.0f;
     public float maxAcceleration = 3.0f;
 
     public float arriveRadius = 0.2f;
-    public float sensorLength = 2f; // for obstacle avoidance
-    public LayerMask obstacleMask;
+    [SerializeField] private float sensorLength = 5f; // for obstacle avoidance
+    [SerializeField] private LayerMask obstacleMask;
 
     private void Awake()
     {
-        GetComponent<Renderer>().material.SetColor("_BaseColor", Random.ColorHSV(0, 1, 0.5f, 1, 0.5f, 1));
+        GetComponent<Renderer>().material.SetColor("_BaseColor", Random.ColorHSV(0, 1, 0.5f, 1, 0.5f, 1));//make the fish different colour 
         rigidbody = GetComponent<Rigidbody>();
         rigidbody.linearVelocity = Random.insideUnitSphere;
     }
 
     private void Start()
     {
-        
+        obstacleMask = LayerMask.GetMask("Obstacle");
     }
+    private Vector3 ObstacleAvoidance()
+    {
+        RaycastHit hit;
+        //3 detection Ray
+        Vector3[] directions = {
+            transform.forward,
+            Quaternion.AngleAxis(30, Vector3.up) * transform.forward,
+            Quaternion.AngleAxis(-30, Vector3.up) * transform.forward
+        };
 
+        foreach (Vector3 dir in directions)
+        {
+            if (Physics.Raycast(transform.position, dir, out hit, sensorLength, obstacleMask))
+            {
+                Vector3 avoidDir = Vector3.Reflect(dir, hit.normal);
+                return avoidDir.normalized * maxAcceleration;
+            }
+        }
+
+        return Vector3.zero;
+    }
     private void FixedUpdate()
     {
         Vector3 target = MouseTarget.Position;
         //bool LeftClick = MouseTarget.LeftClick;//
         Vector3 totalSteering = Vector3.zero;
         Debug.Log("Right Mouse Pressed: " + Input.GetMouseButton(1));
+        // Debug.DrawRay(transform.position, transform.forward * 5f, Color.red);
+        Vector3 avoidance = ObstacleAvoidance();
+        if (avoidance != Vector3.zero)
+        {
+            Debug.Log("Avoiding obstacle!");
+        }
         // 控制模式处理（需要 BoidSimulationControl.cs）
         switch (BoidSimulationControl.Instance.controlMode)
         {
@@ -38,7 +65,7 @@ public class Boid : MonoBehaviour
                 if (Input.GetMouseButton(1)) // 右键按住时使用 Flee 行为
                     totalSteering += Flee(target);
 
-                else if(Input.GetMouseButton(0))
+                else if (Input.GetMouseButton(0))
                     totalSteering += Seek(target);
                 break;
             case BoidSimulationControl.ControlMode.Pursue:
@@ -52,12 +79,26 @@ public class Boid : MonoBehaviour
                 GameObject food = FindNearestWithTag("Food");
                 if (food != null) totalSteering += Arrive(food);
                 break;
+            /*case BoidSimulationControl.ControlMode.Obstacle:
+                GameObject nearestObstacle = FindNearestWithTag("Obstacle");
+                if (nearestObstacle != null)
+                {
+                    Vector3 toObstacle = nearestObstacle.transform.position - transform.position;
+                    Vector3 awayFromObstacle = -toObstacle.normalized * maxAcceleration;
+                    totalSteering += awayFromObstacle;
+                }
 
+                totalSteering += Seek(target); // 继续朝目标移动
+                break;
+        }*/
+    
             case BoidSimulationControl.ControlMode.Obstacle:
-                totalSteering += ObstacleAvoidance();
+                totalSteering += Seek(target); 
+                
                 break;
                 
         }
+        totalSteering += ObstacleAvoidance();
 
         ApplySteering(totalSteering);
 
@@ -109,41 +150,39 @@ public class Boid : MonoBehaviour
         return steer.normalized * maxAcceleration;
     }
 
-    private Vector3 ObstacleAvoidance()
-    {
-        RaycastHit hit;
-        Vector3[] directions = {
-            transform.forward,
-            Quaternion.AngleAxis(30, Vector3.up) * transform.forward,
-            Quaternion.AngleAxis(-30, Vector3.up) * transform.forward
-        };
+    
 
-        foreach (Vector3 dir in directions)
-        {
-            if (Physics.Raycast(transform.position, dir, out hit, sensorLength, obstacleMask))
-            {
-                Vector3 avoidDir = Vector3.Reflect(dir, hit.normal);
-                return avoidDir.normalized * maxAcceleration;
-            }
-        }
-
-        return Vector3.zero;
-    }
-
-    private void ApplySteering(Vector3 acceleration)
+    private void ApplySteering(Vector3 acceleration)// add a acceleration and get a linearVelocity
     {
         if (acceleration.magnitude > maxAcceleration)
-            acceleration = acceleration.normalized * maxAcceleration;
+            acceleration = acceleration.normalized * maxAcceleration;//limit max Acceleration
 
         Vector3 newVelocity = rigidbody.linearVelocity + acceleration * Time.fixedDeltaTime;
 
         if (newVelocity.magnitude > maxSpeed)
-            newVelocity = newVelocity.normalized * maxSpeed;
+            newVelocity = newVelocity.normalized * maxSpeed;//limit max speed
 
         rigidbody.linearVelocity = newVelocity;
     }
 
-    private GameObject FindNearestWithTag(string tag)
+    private void OnDrawGizmosSelected()//can see the ray :Red
+    {
+        if (!Application.isPlaying) return;
+
+        Gizmos.color = Color.red;
+        Vector3[] dirs = new Vector3[]
+        {
+        transform.forward,
+        Quaternion.AngleAxis(30, Vector3.up) * transform.forward,
+        Quaternion.AngleAxis(-30, Vector3.up) * transform.forward
+        };
+
+        foreach (var dir in dirs)
+        {
+            Gizmos.DrawRay(transform.position, dir * sensorLength);
+        }
+    }
+    private GameObject FindNearestWithTag(string tag)// find the near food 
     {
         GameObject[] targets = GameObject.FindGameObjectsWithTag(tag);
         GameObject nearest = null;
