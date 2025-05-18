@@ -76,7 +76,11 @@ public class BoidSimulationControl : MonoBehaviour
         {
             controlMode = ControlMode.Obstacle;
         }
-       
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            ResetSimulation();
+        }
+
     }
 
 
@@ -105,6 +109,35 @@ public class BoidSimulationControl : MonoBehaviour
                  obstacle.tag = "Obstacle";
              }
         }
+    }
+    private void ResetSimulation()
+    {
+        // 删除所有 Boids
+        foreach (var boid in boids)
+        {
+            if (boid != null)
+                Destroy(boid.gameObject);
+        }
+        boids.Clear();
+
+        // 删除所有 Food 和 Obstacle
+        foreach (var food in GameObject.FindGameObjectsWithTag("Food"))
+            Destroy(food);
+
+        foreach (var obs in GameObject.FindGameObjectsWithTag("Obstacle"))
+            Destroy(obs);
+
+        // 重新生成 Boid
+        for (int i = 0; i < numBoidToSpawn; i++)
+        {
+            Vector3 position = new Vector3(Random.Range(-1.4f, 1.4f), Random.Range(0, 1.4f), Random.Range(-0.9f, 0.9f));
+            Quaternion rotation = Random.rotation;
+            GameObject spawnedBoid = Instantiate(boidPrefab, position, rotation);
+            boids.Add(spawnedBoid.GetComponent<Boid>());
+            spawnedBoid.transform.localScale *= Random.Range(0.9f, 3f);
+        }
+
+        Debug.Log("Simulation Reset!");
     }
 }
 

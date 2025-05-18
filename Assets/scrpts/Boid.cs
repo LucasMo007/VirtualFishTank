@@ -46,9 +46,8 @@ public class Boid : MonoBehaviour
 
         return Vector3.zero;
     }
-    private void FixedUpdate()
-    {
-        Vector3 target = MouseTarget.Position;
+   
+        /*Vector3 target = MouseTarget.Position;
         //bool LeftClick = MouseTarget.LeftClick;//
         Vector3 totalSteering = Vector3.zero;
         Debug.Log("Right Mouse Pressed: " + Input.GetMouseButton(1));
@@ -79,33 +78,86 @@ public class Boid : MonoBehaviour
                 GameObject food = FindNearestWithTag("Food");
                 if (food != null) totalSteering += Arrive(food);
                 break;
-            /*case BoidSimulationControl.ControlMode.Obstacle:
-                GameObject nearestObstacle = FindNearestWithTag("Obstacle");
-                if (nearestObstacle != null)
-                {
-                    Vector3 toObstacle = nearestObstacle.transform.position - transform.position;
-                    Vector3 awayFromObstacle = -toObstacle.normalized * maxAcceleration;
-                    totalSteering += awayFromObstacle;
-                }
+                /*case BoidSimulationControl.ControlMode.Obstacle:
+                    GameObject nearestObstacle = FindNearestWithTag("Obstacle");
+                    if (nearestObstacle != null)
+                    {
+                        Vector3 toObstacle = nearestObstacle.transform.position - transform.position;
+                        Vector3 awayFromObstacle = -toObstacle.normalized * maxAcceleration;
+                        totalSteering += awayFromObstacle;
+                    }
 
-                totalSteering += Seek(target); // 继续朝目标移动
-                break;
-        }*/
-    
-            case BoidSimulationControl.ControlMode.Obstacle:
-                totalSteering += Seek(target); 
-                
-                break;
-                
+                    totalSteering += Seek(target); // 继续朝目标移动
+                    break;
+            }*/
+
+        //case BoidSimulationControl.ControlMode.Obstacle:
+        //totalSteering += Seek(target); 
+
+        // break;
+        // Vector3 avoidance = ObstacleAvoidance();
+        /*if (avoidance != Vector3.zero)
+        {
+            Debug.Log("Avoiding obstacle!");
+            totalSteering = avoidance; // 优先避障
         }
-        totalSteering += ObstacleAvoidance();
+        else
+        {
+            totalSteering = Seek(target); // 没有障碍才去目标
+        }
+}
+totalSteering += ObstacleAvoidance();
+
+ApplySteering(totalSteering);
+
+if (rigidbody.linearVelocity.magnitude > 0.1f)
+    transform.forward = rigidbody.linearVelocity.normalized;
+}*/
+private void FixedUpdate()
+    {
+        Vector3 target = MouseTarget.Position;
+        Vector3 totalSteering = Vector3.zero;
+
+        // 控制模式处理
+        switch (BoidSimulationControl.Instance.controlMode)
+        {
+            case BoidSimulationControl.ControlMode.Seek:
+                if (Input.GetMouseButton(1)) // 右键：逃离
+                    totalSteering = Flee(target);
+                else if (Input.GetMouseButton(0)) // 左键：追逐
+                    totalSteering = Seek(target);
+                break;
+
+            case BoidSimulationControl.ControlMode.Pursue:
+                if (Input.GetMouseButton(0))
+                    totalSteering = Pursue(target);
+                else if (Input.GetMouseButton(1))
+                    totalSteering = Evade(target);
+                break;
+
+            case BoidSimulationControl.ControlMode.Food:
+                GameObject food = FindNearestWithTag("Food");
+                if (food != null) totalSteering = Arrive(food);
+                break;
+
+            case BoidSimulationControl.ControlMode.Obstacle:
+                totalSteering = Seek(target); // 默认朝目标走
+                break;
+        }
+
+        // ✅ 最后统一做避障检查，优先级最高
+        Vector3 avoidance = ObstacleAvoidance();
+        if (avoidance != Vector3.zero)
+        {
+            Debug.Log("Avoiding obstacle!");
+            totalSteering = avoidance;
+        }
 
         ApplySteering(totalSteering);
 
         if (rigidbody.linearVelocity.magnitude > 0.1f)
             transform.forward = rigidbody.linearVelocity.normalized;
     }
-
     private Vector3 Seek(Vector3 target)
     {
         Vector3 desired = (target - transform.position).normalized * maxSpeed;
