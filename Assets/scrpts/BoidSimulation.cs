@@ -18,22 +18,24 @@ public class BoidSimulationControl : MonoBehaviour
     public GameObject foodPrefab;
     public GameObject obstaclePrefab;
 
-    public int numBoidToSpawn = 4;
+    public int numBoidToSpawn = 5;
     public List<Boid> boids = new List<Boid>();
 
     private Camera mainCamera;
 
     public LayerMask groundLayer;
 
+        
+
     private void Awake()
     {
         Instance = this;
     }
-    private void Start()
-    {
+    private void Start()// randomly generate multiple fishes within a fish-tank-sized space. Each fish will have a different position, rotation, and size.
+    {      mainCamera = Camera.main;
         for (int i = 0; i < numBoidToSpawn; i++)
         {
-            mainCamera = Camera.main;
+           
             Vector3 position = new Vector3(Random.Range(-1.4f, 1.4f), Random.Range(0, 1.4f), Random.Range(-0.9f, 0.9f));
             Quaternion rotation = Random.rotation;
             GameObject spawnedBoid = Instantiate(boidPrefab, position, rotation);
@@ -44,19 +46,19 @@ public class BoidSimulationControl : MonoBehaviour
     }
 
     private void Update()
-    {    // 1. 持续更新鼠标位置
+    {    // 1.uodate mouse position
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit hit, 100f, groundLayer))
         {
             MouseTarget.Position = hit.point;
         }
 
-        // 2. 处理鼠标点击（放置物体）
-        if (Input.GetMouseButtonDown(0)) HandleMouseClick(true);   // 左键：放食物
-        if (Input.GetMouseButtonDown(1)) HandleMouseClick(false);  // 右键：放障碍
+        // 2. left click put stuff:food or obstacle
+        if (Input.GetMouseButtonDown(0)) HandleMouseClick(true);   
+        if (Input.GetMouseButtonDown(1)) HandleMouseClick(false);  
 
-        // 3. 显示调试信息
-        Debug.Log("Mouse World Position: " + MouseTarget.Position);
+        // 
+       // Debug.Log("Mouse World Position: " + MouseTarget.Position);
 
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
@@ -112,7 +114,7 @@ public class BoidSimulationControl : MonoBehaviour
     }
     private void ResetSimulation()
     {
-        // 删除所有 Boids
+        // delete all fishes
         foreach (var boid in boids)
         {
             if (boid != null)
@@ -120,14 +122,14 @@ public class BoidSimulationControl : MonoBehaviour
         }
         boids.Clear();
 
-        // 删除所有 Food 和 Obstacle
+        // delete all Food 和 Obstacle
         foreach (var food in GameObject.FindGameObjectsWithTag("Food"))
             Destroy(food);
 
         foreach (var obs in GameObject.FindGameObjectsWithTag("Obstacle"))
             Destroy(obs);
 
-        // 重新生成 Boid
+        // spawn fishes again
         for (int i = 0; i < numBoidToSpawn; i++)
         {
             Vector3 position = new Vector3(Random.Range(-1.4f, 1.4f), Random.Range(0, 1.4f), Random.Range(-0.9f, 0.9f));

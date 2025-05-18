@@ -117,13 +117,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8afbf8b5cb66bc24e8bb8c8a48dc4196, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxSpeed: 0.5
+  maxSpeed: 4
   maxAcceleration: 8
-  arriveRadius: 0.2
+  arriveRadius: 0.7
   sensorLength: 5
   obstacleMask:
     serializedVersion: 2
     m_Bits: 256
+  neighborRadius: 3
+  separationRadius: 0.5
 --- !u!54 &4704192958434421656
 Rigidbody:
   m_ObjectHideFlags: 0
