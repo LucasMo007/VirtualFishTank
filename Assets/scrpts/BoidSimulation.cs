@@ -122,7 +122,7 @@ public class BoidSimulationControl : MonoBehaviour
         }
         boids.Clear();
 
-        // delete all Food 和 Obstacle
+        // delete all Food and Obstacle
         foreach (var food in GameObject.FindGameObjectsWithTag("Food"))
             Destroy(food);
 
