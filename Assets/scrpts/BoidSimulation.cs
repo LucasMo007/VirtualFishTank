@@ -24,8 +24,11 @@ public class BoidSimulationControl : MonoBehaviour
     private Camera mainCamera;
 
     public LayerMask groundLayer;
+    //public LayerMask waterLayer;
+    Vector3 pos = MouseTarget.Position;
 
-        
+
+
 
     private void Awake()
     {
@@ -48,7 +51,7 @@ public class BoidSimulationControl : MonoBehaviour
     private void Update()
     {    // 1.uodate mouse position
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out RaycastHit hit, 100f, groundLayer))
+        if (Physics.Raycast(ray, out RaycastHit hit, 100f, groundLayer)) //groundLayer//))
         {
             MouseTarget.Position = hit.point;
         }
@@ -92,7 +95,7 @@ public class BoidSimulationControl : MonoBehaviour
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit hit, 100f, groundLayer))
         {
-            Vector3 targetPos = hit.point;
+            Vector3 targetPos = hit.point + new Vector3 (0,0.12f,0);
 
             // Save global mouse target
             //MouseTarget.Position = targetPos;//
