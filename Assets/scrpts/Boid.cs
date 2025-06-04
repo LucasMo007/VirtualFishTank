@@ -113,13 +113,9 @@ public class Boid : MonoBehaviour
         if (rigidbody.linearVelocity.magnitude > 0.1f)
             transform.forward = rigidbody.linearVelocity.normalized;
     }
-    /*private Vector3 Seek(Vector3 target)
-    {    
-        Vector3 desired = (target - transform.position).normalized * maxSpeed;
-        return (desired - rigidbody.linearVelocity).normalized * maxAcceleration;
-    }*/
+   
     public Vector3 Seek(Vector3 target)
-    { /*Vector3 toTarget = target - transform.position;
+    { /*Verson 1: Vector3 toTarget = target - transform.position;
         Vector3 toTargetNoemalized = toTarget.normalized;
         Vector3 accel =toTargetNoemalized*maxAcceleration;
         return accel;*/
@@ -137,9 +133,7 @@ public class Boid : MonoBehaviour
     }
     public Vector3 Flee(Vector3 target)
     {
-        /* Vector3 desired = (transform.position - target).normalized * maxSpeed;
-         Vector3 steer = desired - rigidbody.linearVelocity;
-         return steer.normalized * maxAcceleration;*/
+       
         
 {
             // 1. Calculate the direction away from the target
@@ -159,15 +153,7 @@ public class Boid : MonoBehaviour
             return accel;
         }
     }
-    /*private Vector3 Pursue(Vector3 target)
-    {
-        
-
-        Vector3 desiredDir = (target - transform.position).normalized;
-        Vector3 currentDir = rigidbody.linearVelocity.normalized;
-        Vector3 steer = (desiredDir - currentDir).normalized * maxAcceleration;
-        return steer;
-}*/
+   
     public Vector3 Pursue(Vector3 targetPosition, Vector3 targetVelocity)
     {
         // 1. Calculate the distance between the target and the pursuer
@@ -182,19 +168,7 @@ public class Boid : MonoBehaviour
         // 4. Seek the predicted future position
         return Seek(futurePosition);
     }
-    /*(private Vector3 Evade(Vector3 target)
-    {
-        /*float safeDistance = 3.0f;
-        Vector3 toTarget = transform.position - target;
-
-        if (toTarget.magnitude > safeDistance)
-            return Vector3.zero; 
-
-        Vector3 fleeDir = (transform.position - target).normalized;
-        Vector3 currentDir = rigidbody.linearVelocity.normalized;
-        Vector3 steer = (fleeDir - currentDir).normalized * maxAcceleration;
-        return steer;*/
-    //}
+    
     public Vector3 Evade(Vector3 targetPosition, Vector3 targetVelocity)
     {
         // 1. Calculate the distance between the target and the evader
@@ -245,27 +219,7 @@ public class Boid : MonoBehaviour
 
         return nearest;
     }
-    /* private Vector3 ObstacleAvoidance()
-     {
-         RaycastHit hit;
-         //3 detection Ray
-         Vector3[] directions = {
-             transform.forward,
-             Quaternion.AngleAxis(30, Vector3.up) * transform.forward,
-             Quaternion.AngleAxis(-30, Vector3.up) * transform.forward
-         };
-
-         foreach (Vector3 dir in directions)
-         {
-             if (Physics.Raycast(transform.position, dir, out hit, sensorLength, obstacleMask))
-             {
-                 Vector3 avoidDir = Vector3.Reflect(dir, hit.normal);
-                 return avoidDir.normalized * maxAcceleration;
-             }
-         }
-
-         return Vector3.zero;
-     }*/
+    
     private Vector3 ObstacleAvoidance()
     {
         RaycastHit hit;
@@ -293,43 +247,7 @@ public class Boid : MonoBehaviour
 
         return avoidanceForce.normalized * maxAcceleration;
     }
-    /*public Vector3 ObstacleAvoidance(float lookaheadDistance ,float acceleration )
-    {
-        Vector3 accelOut = Vector3.zero;
-
-       
-        Ray whiskerLeft = new Ray(transform.position, Quaternion.AngleAxis(20, transform.up) * transform.forward);
-        Ray whiskerRight = new Ray(transform.position, Quaternion.AngleAxis(-20, transform.up) * transform.forward);
-        RaycastHit hitInfoLeft;
-        RaycastHit hitInfoRight;
-        
-
-        bool didHitLeft = Physics.Raycast(whiskerLeft.origin, whiskerLeft.direction, out hitInfoLeft, lookaheadDistance);
-        if (didHitLeft)
-        {
-            accelOut = transform.right * acceleration;
-            Debug.DrawLine(whiskerLeft.origin, hitInfoLeft.point, Color.red);
-        }
-        else
-        {
-            Debug.DrawRay(whiskerLeft.origin, whiskerLeft.direction * lookaheadDistance, Color.yellow);
-        }
-
-       
-        bool didHitRight = Physics.Raycast(whiskerRight.origin, whiskerRight.direction, out hitInfoRight, lookaheadDistance);
-        if (didHitRight)
-        {
-            accelOut = -transform.right * acceleration;
-            Debug.DrawLine(whiskerRight.origin, hitInfoRight.point, Color.red);
-        }
-        else
-        {
-            Debug.DrawRay(whiskerRight.origin, whiskerRight.direction * lookaheadDistance, Color.yellow);
-        }
-
-        return accelOut;
-
-    }*/
+   
 
 
     private void ApplySteering(Vector3 acceleration)// add a acceleration and get a linearVelocity
