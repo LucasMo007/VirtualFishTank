@@ -4,8 +4,6 @@ George Brown College. (n.d.). Avoiding Plagiarism. Library Learning Commons. htt
 
 Unity Technologies. (n.d.). Rigidbody - Unity Scripting API. https://docs.unity3d.com/ScriptReference/Rigidbody.html
 
-Unity Technologies. (n.d.). Introduction to Steering Behaviors. Unity Learn. https://learn.unity.com/tutorial/steering-behaviors
-
 Code structure, including classes, movement logic, and behavior scripts, are adapted from:
 - Weekly lab work in this course
 - Unity official tutorials (Unity Learn)
